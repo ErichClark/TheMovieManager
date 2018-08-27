@@ -31,7 +31,7 @@ extension TMDBClient {
             if success {
                 
                 // success! we have the requestToken!
-                print(requestToken!)
+                print("** requestToken = \(requestToken!)")
                 self.requestToken = requestToken
                 
                 self.loginWithToken(requestToken, hostViewController: hostViewController) { (success, errorString) in
@@ -77,14 +77,21 @@ extension TMDBClient {
         /* 2. Make the request */
         /* 3. Send the desired value(s) to completion handler */
         
+        let parameters: [String:AnyObject] = [:]
+        let method = TMDBClient.Methods.AuthenticationTokenNew
         
-         
-         let _ = taskForGETMethod(method, parameters: parameters) { (results, error) in
-         
+        let _ = taskForGETMethod(method, parameters: parameters as [String : AnyObject]) { (results:RequestToken?, error:Error?) in
+
+            if let error = error {
+                let errorString = "There was an error gettign token: \(error)"
+                completionHandlerForToken(false, nil, errorString)
+            } else {
+                let token = results?.request_token
+                completionHandlerForToken(true, token, nil)
+            }
+            
          }
-         
-         
-        
+
         
     }
     private func loginWithToken(_ requestToken: String?, hostViewController: UIViewController, completionHandlerForLogin: @escaping (_ success: Bool, _ errorString: String?) -> Void) {
