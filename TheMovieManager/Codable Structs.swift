@@ -31,6 +31,11 @@ struct RequestToken: Codable {
     var request_token: String?
 }
 
+struct TMDBError: Codable {
+    var status_code: Int?
+    var status_message: String?
+}
+
 // MARK: - Validate With Login
 
 struct Validate_With_Login: Codable {

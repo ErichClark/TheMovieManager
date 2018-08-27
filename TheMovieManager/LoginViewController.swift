@@ -11,12 +11,12 @@ import UIKit
 // MARK: - LoginViewController: UIViewController
 
 class LoginViewController: UIViewController {
-
+    
     // MARK: Properties
     
     @IBOutlet weak var debugTextLabel: UILabel!
     @IBOutlet weak var loginButton: BorderedButton!
-
+    
     var tmdbClient: TMDBClient!
     
     // MARK: Life Cycle
@@ -41,14 +41,14 @@ class LoginViewController: UIViewController {
         
         // MARK: Authentication (GET) Methods
         /*
-            Steps for Authentication...
-            https://www.themoviedb.org/documentation/api/sessions
-            
-            Step 1: Create a new request token
-            Step 2a: Ask the user for permission via the website
-            Step 3: Create a session ID
-            Bonus Step: Go ahead and get the user id 😄!
-        */
+         Steps for Authentication...
+         https://www.themoviedb.org/documentation/api/sessions
+         
+         Step 1: Create a new request token
+         Step 2a: Ask the user for permission via the website
+         Step 3: Create a session ID
+         Bonus Step: Go ahead and get the user id 😄!
+         */
         getRequestToken()
     }
     
