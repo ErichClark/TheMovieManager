@@ -82,10 +82,7 @@ class TMDBClient : NSObject {
             }
             
             completionHandlerForGET(jsonObject, error as Error?)
-            
-            // TODO: -
-            /* 5/6. Parse the data and use the data (happens in completion handler) */
-            //            self.convertDataWithCompletionHandler(data, completionHandlerForConvertData: completionHandlerForGET)
+
         }
         
         /* 7. Start the request */
@@ -95,7 +92,7 @@ class TMDBClient : NSObject {
     
     // MARK: POST
     
-    func taskForPOSTMethod(_ method: String, parameters: [String:AnyObject], postData: Data, completionHandlerForPOST: @escaping (_ result: Data?, _ error: NSError?) -> Void )  {
+    func taskForPOSTMethod<T: Decodable>(_ method: String, parameters: [String:AnyObject], postData: Data, completionHandlerForPOST: @escaping (_ result: T?, _ error: NSError?) -> Void )  {
         
         var returnData: Data? = nil
         let headerFields = ["content-type": "application/json;charset=utf-8",
@@ -139,7 +136,18 @@ class TMDBClient : NSObject {
                 return
             }
             
-            completionHandlerForPOST(data, error as Error? as! NSError)
+            var jsonObject: T? = nil
+            do {
+                let jsonDecoder = JSONDecoder()
+                let jsonData = Data(data)
+                jsonObject = try jsonDecoder.decode(T.self, from: jsonData)
+            } catch {
+                sendError(error.localizedDescription)
+                return
+            }
+            
+            completionHandlerForPOST(jsonObject, error as NSError?)
+            
         }
         task.resume()
     }
