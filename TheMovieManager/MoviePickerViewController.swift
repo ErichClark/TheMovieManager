@@ -54,7 +54,6 @@ class MoviePickerViewController: UIViewController {
     @IBAction func cancel(_ sender: Any) {
         delegate?.moviePicker(self, didPickMovie: nil)
         self.dismiss(animated: true, completion: nil)
-        
     }
 
     
