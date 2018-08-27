@@ -15,14 +15,14 @@ extension TMDBClient {
     
     // MARK: Authentication (GET) Methods
     /*
-        Steps for Authentication...
-        https://www.themoviedb.org/documentation/api/sessions
-        
-        Step 1: Create a new request token
-        Step 2a: Ask the user for permission via the website
-        Step 3: Create a session ID
-        Bonus Step: Go ahead and get the user id 😄!
-    */
+     Steps for Authentication...
+     https://www.themoviedb.org/documentation/api/sessions
+     
+     Step 1: Create a new request token
+     Step 2a: Ask the user for permission via the website
+     Step 3: Create a session ID
+     Bonus Step: Go ahead and get the user id 😄!
+     */
     func authenticateWithViewController(_ hostViewController: UIViewController, completionHandlerForAuth: @escaping (_ success: Bool, _ errorString: String?) -> Void) {
         
         // chain completion handlers for each request so that they run one after the other
@@ -71,26 +71,22 @@ extension TMDBClient {
         }
     }
     
-    private func getRequestToken(_ completionHandlerForToken: @escaping ( _ success: Bool, _ requestToken: String?, _ errorString: String?) -> Void) {
-
-        let parameters: [String:AnyObject] = [:]
-        let method = Methods.AuthenticationTokenNew
-        taskForGETMethod(method, parameters: parameters) { (data: RequestToken?, error: Error?) in
-
-
-        }
+    private func getRequestToken(_ completionHandlerForToken: @escaping (_ success: Bool, _ requestToken: String?, _ errorString: String?) -> Void) {
+        
+        /* 1. Specify parameters, method (if has {key}), and HTTP body (if POST) */
         /* 2. Make the request */
         /* 3. Send the desired value(s) to completion handler */
-
-        /*
-
-        taskForGETMethod(method, parameters: parameters) { (results, error) in
-
-        }
-
-        */
+        
+        
+         
+         let _ = taskForGETMethod(method, parameters: parameters) { (results, error) in
+         
+         }
+         
+         
+        
+        
     }
-    
     private func loginWithToken(_ requestToken: String?, hostViewController: UIViewController, completionHandlerForLogin: @escaping (_ success: Bool, _ errorString: String?) -> Void) {
         
         let authorizationURL = URL(string: "\(TMDBClient.Constants.AuthorizationURL)\(requestToken!)")
