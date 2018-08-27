@@ -55,19 +55,19 @@ class TMDBClient : NSObject {
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                sendError("There was an error with your request: \(String(describing: error))")
+                sendError("There was an error with your GET request: \(String(describing: error))")
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                sendError("Your request returned a status code other than 2xx!")
+                sendError("Your GET request returned a status code other than 2xx!")
                 return
             }
             
             /* GUARD: Was there any data returned? */
             guard let data = data else {
-                sendError("No data was returned by the request!")
+                sendError("No data was returned by the GET request!")
                 return
             }
             
@@ -85,15 +85,52 @@ class TMDBClient : NSObject {
     
     // MARK: POST
     
-//    func taskForPOSTMethod(_ method: String, parameters: [String:AnyObject], jsonBody: String, completionHandlerForPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) {
-//
-//        var returnData: Data? = nil
-    
-//        data = returnData!
-//
-//        task.resume()
-//        return returnData
-//    }
+    func taskForPOSTMethod(_ method: String, parameters: [String:AnyObject], postData: Data, headerFields: [String:String], completionHandlerForPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void ) -> Data {
+        
+        var returnData: Data? = nil
+        /* 1. Set the parameters */
+        var parametersWithApiKey = parameters
+        parametersWithApiKey[ParameterKeys.ApiKey] = Constants.ApiKey as AnyObject?
+        
+        /* 2/3. Build the URL, Configure the request */
+        let request = NSMutableURLRequest(url: TMDBClient.tmdbURLFromParameters(parametersWithApiKey, withPathExtension: method))
+        
+        request.httpMethod = "POST"
+        request.allHTTPHeaderFields = headerFields
+        request.httpBody = postData
+        
+        /* 4. Make the request */
+        let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
+            
+            func sendError(_ error: String) {
+                print(error)
+                let userInfo = [NSLocalizedDescriptionKey : error]
+                completionHandlerForPOST(nil, NSError(domain: "taskForGETMethod", code: 1, userInfo: userInfo))
+            }
+            
+            /* GUARD: Was there an error? */
+            guard (error == nil) else {
+                sendError("There was an error with your POST request: \(String(describing: error))")
+                return
+            }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
+                sendError("Your POST request returned a status code other than 2xx!")
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                sendError("No data was returned by the POST request!")
+                return
+            }
+            
+            returnData = data
+        }
+        task.resume()
+        return returnData!
+    }
     
     // MARK: GET Image
     
@@ -113,19 +150,19 @@ class TMDBClient : NSObject {
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                print("There was an error with your request: \(error!)")
+                print("There was an error with your Image request: \(error!)")
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                print("Your request returned a status code other than 2xx!")
+                print("Your Image request returned a status code other than 2xx!")
                 return
             }
             
             /* GUARD: Was there any data returned? */
             guard let data = data else {
-                print("No data was returned by the request!")
+                print("No data was returned by the Image request!")
                 return
             }
             

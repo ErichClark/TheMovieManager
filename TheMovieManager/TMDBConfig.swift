@@ -27,7 +27,7 @@ class TMDBConfig: NSObject, NSCoding {
     
     // MARK: Properties
     
-    // default values from 1/12/15
+    // default values from 08/26/2018
     var baseImageURLString = "http://image.tmdb.org/t/p/"
     var secureBaseImageURLString =  "https://image.tmdb.org/t/p/"
     var posterSizes = ["w92", "w154", "w185", "w342", "w500", "w780", "original"]
