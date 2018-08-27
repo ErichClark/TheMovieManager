@@ -85,9 +85,11 @@ class TMDBClient : NSObject {
     
     // MARK: POST
     
-    func taskForPOSTMethod(_ method: String, parameters: [String:AnyObject], postData: Data, headerFields: [String:String], completionHandlerForPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void ) -> Data {
+    func taskForPOSTMethod(_ method: String, parameters: [String:AnyObject], postData: Data, completionHandlerForPOST: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void ) -> Data {
         
         var returnData: Data? = nil
+        let headerFields = ["content-type": "application/json;charset=utf-8",
+                       "accept": "application/json;charset=utf-8"]
         /* 1. Set the parameters */
         var parametersWithApiKey = parameters
         parametersWithApiKey[ParameterKeys.ApiKey] = Constants.ApiKey as AnyObject?
