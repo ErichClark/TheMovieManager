@@ -14,7 +14,7 @@ class WatchlistViewController: UIViewController {
     
     // MARK: Properties
     
-    var movies: [TMDBMovie] = [TMDBMovie]()
+    var movies = [Movie]()
     
     // MARK: Outlets
     
@@ -28,6 +28,18 @@ class WatchlistViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        TMDBClient.sharedInstance().getWatchlistMovies { (movies, error) in
+            if let movies = movies {
+                self.movies = movies.results!
+                print("your watchlist movies are \(self.movies)")
+                performUIUpdatesOnMain {
+                    self.moviesTableView.reloadData()
+                }
+            } else {
+                print(error ?? "empty error")
+            }
+        }
     }
     
     // MARK: Logout

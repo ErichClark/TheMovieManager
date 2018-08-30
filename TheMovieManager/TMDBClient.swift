@@ -21,7 +21,7 @@ class TMDBClient : NSObject {
     var config = TMDBConfig()
     
     // authentication state
-    var requestToken: String? = nil
+    var requestToken: RequestToken? = nil
     var sessionID : String? = nil
     var userID : Int? = nil
     
@@ -42,6 +42,7 @@ class TMDBClient : NSObject {
         let url = TMDBClient.tmdbURLFromParameters(parametersWithApiKey, withPathExtension: method)
         /* 2/3. Build the URL, Configure the request */
         let request = URLRequest(url: url)
+        print("** URL Request for \(method) = \(request)")
         
         /* 4. Make the request */
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
@@ -60,8 +61,9 @@ class TMDBClient : NSObject {
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                let errorMessageFromJSON = self.parseErrorFromTMDB(methodDescription: method, data!)
-                sendError(errorMessageFromJSON)
+                if let errorMessageFromJSON = self.parseErrorFromTMDB(methodDescription: method, data: data!) {
+                    print(errorMessageFromJSON)
+                }
                 return
             }
             
@@ -92,7 +94,7 @@ class TMDBClient : NSObject {
     
     // MARK: POST
     
-    func taskForPOSTMethod<T: Decodable>(_ method: String, parameters: [String:AnyObject], postData: Data, completionHandlerForPOST: @escaping (_ result: T?, _ error: NSError?) -> Void )  {
+    func taskForPOSTMethod<TResponse: Decodable, TRequest: Encodable>(_ method: String, parameters: [String:AnyObject], postObject: TRequest, completionHandlerForPOST: @escaping (_ result: TResponse?, _ error: NSError?) -> Void )  {
         
         var returnData: Data? = nil
         let headerFields = ["content-type": "application/json;charset=utf-8",
@@ -104,9 +106,17 @@ class TMDBClient : NSObject {
         /* 2/3. Build the URL, Configure the request */
         let request = NSMutableURLRequest(url: TMDBClient.tmdbURLFromParameters(parametersWithApiKey, withPathExtension: method))
         
+        var postBody: Data? = nil
+        do {
+            let jsonEncoder = JSONEncoder()
+            postBody = try jsonEncoder.encode(postObject)
+        }
+        catch {print(error)}
+        
+        
         request.httpMethod = "POST"
         request.allHTTPHeaderFields = headerFields
-        request.httpBody = postData
+        request.httpBody = postBody
         
         /* 4. Make the request */
         let task = session.dataTask(with: request as URLRequest) { (data, response, error) in
@@ -119,14 +129,17 @@ class TMDBClient : NSObject {
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                let errorMessage = self.parseErrorFromTMDB(methodDescription: method, data!)
-                print(errorMessage)
+                print(error!)
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
-            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                sendError("Your POST request returned a status code other than 2xx!")
+            guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else
+            {
+                print(data!)
+                if let errorMessageFromJSON = self.parseErrorFromTMDB(methodDescription: method, data: data!) {
+                    print(errorMessageFromJSON)
+                }
                 return
             }
             
@@ -136,11 +149,11 @@ class TMDBClient : NSObject {
                 return
             }
             
-            var jsonObject: T? = nil
+            var jsonObject: TResponse? = nil
             do {
                 let jsonDecoder = JSONDecoder()
                 let jsonData = Data(data)
-                jsonObject = try jsonDecoder.decode(T.self, from: jsonData)
+                jsonObject = try jsonDecoder.decode(TResponse.self, from: jsonData)
             } catch {
                 sendError(error.localizedDescription)
                 return
@@ -169,14 +182,15 @@ class TMDBClient : NSObject {
             
             /* GUARD: Was there an error? */
             guard (error == nil) else {
-                let errorMessage = self.parseErrorFromTMDB(methodDescription: "taskForGETImgae", data!)
-                print(errorMessage)
+                print(error!)
                 return
             }
             
             /* GUARD: Did we get a successful 2XX response? */
             guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-                print("Your Image request returned a status code other than 2xx!")
+                if let errorMessageFromJSON = self.parseErrorFromTMDB(methodDescription: nil, data: data!) {
+                    print(errorMessageFromJSON)
+                }
                 return
             }
             
@@ -205,16 +219,19 @@ class TMDBClient : NSObject {
         }
     }
     
-    func parseErrorFromTMDB(methodDescription: String, _ data: Data) -> String {
-        var errorString = ""
+    func parseErrorFromTMDB(methodDescription: String?, data: Data) -> String? {
+        var errorString: String? = nil
         do {
             let jsonDecoder = JSONDecoder()
             let jsonData = Data(data)
             let decodedError = try jsonDecoder.decode(TMDBError.self, from: jsonData)
-            errorString = "There was an error with your \(methodDescription) \n"
-            errorString += "Movie Database returned an error of code \(String(describing: decodedError.status_code)) \n"
-            errorString += "message reads \(String(describing: decodedError.status_message))"
-            print("* errorString from parseErrorFromTMDB")
+            if decodedError.status_code != nil {
+                var message = "* An errorString was returned from parseErrorFromTMDB"
+                message += "There was an error with your \(String(describing: methodDescription)) \n"
+                message += "Movie Database returned an error of code \(String(describing: decodedError.status_code)) \n"
+                message += "message reads \(String(describing: decodedError.status_message))"
+                errorString = message
+            }
         }
         catch {print(error)}
         return errorString

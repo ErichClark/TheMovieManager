@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 
 // MARK: - TMDBAuthViewController: UIViewController
 
@@ -15,19 +16,21 @@ class TMDBAuthViewController: UIViewController {
     // MARK: Properties
     
     var urlRequest: URLRequest? = nil
-    var requestToken: String? = nil
+    var requestToken: RequestToken? = nil
     var completionHandlerForView: ((_ success: Bool, _ errorString: String?) -> Void)? = nil
+    let webConfiguration = WKWebViewConfiguration()
     
     // MARK: Outlets
     
-    @IBOutlet weak var webView: UIWebView!
+    @IBOutlet weak var webView: WKWebView!
     
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        webView.delegate = self
+        webView.navigationDelegate = self
+        view = webView
         
         navigationItem.title = "TheMovieDB Auth"
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelAuth))
@@ -37,7 +40,7 @@ class TMDBAuthViewController: UIViewController {
         super.viewWillAppear(animated)
         
         if let urlRequest = urlRequest {
-            webView.loadRequest(urlRequest)
+            webView.load(urlRequest)
         }
     }
     
@@ -50,7 +53,16 @@ class TMDBAuthViewController: UIViewController {
 
 // MARK: - TMDBAuthViewController: UIWebViewDelegate
 
-extension TMDBAuthViewController: UIWebViewDelegate {
-    
+extension TMDBAuthViewController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        let webString = "** Web String Abs Value = \(String(describing: webView.url?.absoluteURL))"
+//        print(webString)
+        if webString.contains("allow") {
+            dismiss(animated: true) {
+                self.completionHandlerForView!(true, nil)
+            }
+        }
+    }
+
     // TODO: Add implementation here
 }

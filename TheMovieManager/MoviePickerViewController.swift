@@ -21,7 +21,7 @@ class MoviePickerViewController: UIViewController {
     // MARK: Properties
     
     // the data for the table
-    var movies = [TMDBMovie]()
+    var movies = [Movie]()
     
     // the delegate will typically be a view controller, waiting for the Movie Picker to return an movie
     var delegate: MoviePickerViewControllerDelegate?
@@ -84,7 +84,7 @@ extension MoviePickerViewController: UISearchBarDelegate {
         
         // if the text is empty we are done
         if searchText == "" {
-            movies = [TMDBMovie]()
+            movies = [Movie]()
             movieTableView?.reloadData()
             return
         }
@@ -105,8 +105,8 @@ extension MoviePickerViewController: UITableViewDelegate, UITableViewDataSource 
         let movie = movies[(indexPath as NSIndexPath).row]
         let cell = tableView.dequeueReusableCell(withIdentifier: CellReuseId) as UITableViewCell?
         
-        if let release_year = movie.release_year {
-            cell?.textLabel!.text = "\(String(describing: movie.title)) (\(release_year))"
+        if let release_date = movie.release_date {
+            cell?.textLabel!.text = "\(String(describing: movie.title)) (\(release_date))"
         } else {
             cell?.textLabel!.text = "\(String(describing: movie.title))"
         }

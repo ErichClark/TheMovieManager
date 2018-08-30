@@ -25,9 +25,7 @@ struct Images: Codable {
 
 // MARK: - Request Token
 
-struct RequestToken: Codable {
-    var success: Bool?
-    var expires_at: String?
+struct RequestToken: Encodable, Decodable {
     var request_token: String?
 }
 
@@ -49,6 +47,12 @@ struct Validate_With_Login: Codable {
 struct SessionID: Codable {
     var success: Bool?
     var session_id: String?
+}
+
+struct BodyForUserAccountPost: Encodable {
+    let api_key = TMDBClient.Constants.ApiKey
+    var request_token: String
+    var session_id: String
 }
 
 // MARK: - Account
@@ -73,14 +77,14 @@ struct Genre: Codable {
 // MARK: - Movie
 
 struct Movies: Codable {
-    var movies: [Movie]?
+    var results: [Movie]?
 }
 
 struct Movie: Codable {
     let title: String?
     let id: Int?
     let poster_path: String?
-    
+    let release_date: String?
 }
 
 extension Movie: Equatable {}

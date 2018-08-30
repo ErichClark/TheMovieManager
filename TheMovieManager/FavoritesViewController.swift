@@ -14,7 +14,7 @@ class FavoritesViewController: UIViewController {
     
     // MARK: Properties
     
-    var movies: [TMDBMovie] = [TMDBMovie]()
+    var movies = [Movie]()
     
     // MARK: Outlets
     
@@ -24,11 +24,25 @@ class FavoritesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        TMDBClient.sharedInstance().getFavoriteMovies { (movies, error) in
+            if let movies = movies {
+                self.movies = movies.results!
+                performUIUpdatesOnMain {
+                    self.moviesTableView.reloadData()
+                }
+            }else {
+                print(error ?? "Empty error")
+            }
+        }
+        print("Your favorites are: \(movies)")
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
     }
+    
     
     // MARK: Logout
     @IBAction func cancel(_ sender: Any) {

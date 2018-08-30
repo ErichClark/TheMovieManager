@@ -14,7 +14,7 @@ class MovieDetailViewController: UIViewController {
     
     // MARK: Properties
     
-    var movie: TMDBMovie?
+    var movie: Movie?
     var isFavorite = false
     var isWatchlist = false
     
